@@ -1,4 +1,4 @@
-import heroBg from "../assets/heroimage.svg";
+import heroBg from "../assets/heroImage.svg";
 import arrow from "../assets/arrow.svg";
 
 const Hero = () => {
