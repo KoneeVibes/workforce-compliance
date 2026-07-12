@@ -1,4 +1,48 @@
+import { useState } from "react";
+
 const Footer = () => {
+	const FORM_ID = import.meta.env.VITE_CONVERTKIT_FORM_ID;
+
+	const [message, setMessage] = useState(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [formDetails, setFormDetails] = useState({ email: "" });
+
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setFormDetails((prev) => ({
+			...prev,
+			[name]: value,
+		}));
+	};
+
+	const handleSubscribe = async (e) => {
+		e.preventDefault();
+		setIsLoading(true);
+		setMessage(null);
+		try {
+			const formData = new FormData();
+			formData.append("email_address", formDetails.email);
+			const response = await fetch(
+				`https://app.kit.com/forms/${FORM_ID}/subscriptions`,
+				{
+					method: "POST",
+					body: formData,
+					mode: "no-cors",
+				},
+			);
+			if (!response.ok) {
+				setMessage("Something went wrong.");
+			}
+			setMessage("Thanks! Check your inbox to confirm.");
+			setFormDetails((prev) => ({ ...prev, email: "" }));
+		} catch (err) {
+			setMessage("Something went wrong.");
+			console.error(err);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	return (
 		<div className="bg-[#F0EDE6] px-4 py-8">
 			<div className="max-w-[1280px] mx-auto bg-[#1B412A] rounded-3xl px-8 md:px-12 py-10 flex flex-col gap-10">
@@ -30,13 +74,29 @@ const Footer = () => {
 						<div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-2">
 							<input
 								type="email"
+								name="email"
+								value={formDetails.email}
+								onChange={(e) => handleChange(e)}
 								placeholder="Your work email"
 								className="w-80 bg-transparent text-sm text-white placeholder:text-white/30 outline-none flex-1 min-w-0"
 							/>
-							<button className="bg-[#B8EE2C] text-[#1a1a1a] font-semibold text-sm px-2 md:px-5 py-2 rounded-full hover:bg-[#99c800] transition-colors shrink-0">
-								Subscribe
+							<button
+								className="bg-[#B8EE2C] text-[#1a1a1a] font-semibold text-sm px-2 md:px-5 py-2 rounded-full hover:bg-[#99c800] transition-colors shrink-0"
+								onClick={handleSubscribe}
+								disabled={isLoading}
+							>
+								{isLoading ? (
+									<span className="w-5 h-5 border-2 border-transparent border-t-[#1a1a1a] rounded-full animate-spin" />
+								) : (
+									<span>Subscribe</span>
+								)}
 							</button>
 						</div>
+						{message && (
+							<div>
+								<p className="text-xs text-[#ffffff]/40 max-w-xs">{message}</p>
+							</div>
+						)}
 
 						{/* Company Links */}
 						{/* <div className="flex flex-col gap-3">
